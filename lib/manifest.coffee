@@ -1,30 +1,33 @@
 expect = require 'expect.js'
 
-module.exports.validate = (file) ->
-    try manifest = require file
-    catch err
-        throw err #@TODO
-    
-    expect(manifest).to.be.ok()
-    
-    expect(manifest['gh-blog']).to.be.an 'object'
+module.exports.validate = (manifest) ->   
 
-    expect(manifest['gh-blog']).to.have.property 'provides'
-    expect(manifest['gh-blog'].provides).to.be.an 'array'
-    expect(manifest['gh-blog'].provides).to.not.be.empty()
+    # Must be valid JSON
+    expect(JSON.stringify).withArgs(manifest).to.not.throwException() # 'MALFORMED_JSON'
+    expect(JSON.parse JSON.stringify manifest).to.eql manifest # 'MALFORMED_JSON'
 
-    if manifest['gh-blog'].hasOwnProperty 'requires'
-        expect(manifest['gh-blog'].requires).to.be.an 'array'
+    expect(manifest).to.be.ok() # 'MALFORMED_MANIFEST_ROOT'
+    
+    expect(root = manifest['gh-blog']).to.be.an 'object' # 'MALFORMED_MANIFEST_ROOT'
+
+    expect(root).to.have.property 'provides' # 'MISSING_MANIFEST_ENTRY'
+    expect(root.provides).to.be.an 'array' # 'MALFORMED_MANIFEST_ENTRY'
+    expect(root.provides).to.not.be.empty() # 'MALFORMED_MANIFEST_ENTRY'
+
+    if root.requires
+        expect(root.requires).to.be.an 'array' # 'MALFORMED_MANIFEST_ENTRY'
+        expect(root.requires).to.not.be.empty() # 'MALFORMED_MANIFEST_ENTRY'
         
         # Plugins should not require features they already provide
-        for feature in manifest['gh-blog'].provides
-            expect(manifest['gh-blog'].requires).to.not.contain feature
+        for feature in root.provides
+            expect(root.requires).to.not.contain feature # 'CIRCULAR_DEPENDENCY'
 
-    if manifest['gh-blog'].hasOwnProperty 'recommends'
-        expect(manifest['gh-blog'].recommends).to.be.an 'array'
+    if root.recommends
+        expect(root.recommends).to.be.an 'array' # 'MALFORMED_MANIFEST_ENTRY'
+        expect(root.recommends).to.not.be.empty() # 'MALFORMED_MANIFEST_ENTRY'
         
         # Plugins should not recommend features they already provide or require
-        for feature in Array::concat manifest['gh-blog'].provides, manifest['gh-blog'].requires
-            expect(manifest['gh-blog'].recommends).to.not.contain feature
+        for feature in Array::concat root.provides, root.requires
+            expect(root.recommends).to.not.contain feature # 'CIRCULAR_DEPENDENCY'
 
     yes
