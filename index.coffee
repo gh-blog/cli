@@ -1,6 +1,6 @@
 Resolver = require './lib/resolver'
 
-resolver = new Resolver '/home/f/git/gh-blog/plugins'
+resolver = new Resolver './test/samples'
 
 for type in ['required', 'installed', 'recommended', 'missing']
-    console.log "#{type}:", Object.keys(resolver.features type).length
+    console.log "#{type}:", Object.keys(resolver.features type).join ', '
