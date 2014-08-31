@@ -1,33 +1,69 @@
 expect = require 'expect.js'
 
+{ ManifestError } = require './errors'
+
 module.exports.validate = (manifest) ->   
 
     # Must be valid JSON
-    expect(JSON.stringify).withArgs(manifest).to.not.throwException() # 'MALFORMED_JSON'
-    expect(JSON.parse JSON.stringify manifest).to.eql manifest # 'MALFORMED_JSON'
+    try
+        expect(JSON.stringify).withArgs(manifest).to.not.throwException()
+        expect(JSON.parse JSON.stringify manifest).to.eql manifest
+    catch err
+        throw new ManifestError 'MALFORMED_JSON', err
 
-    expect(manifest).to.be.ok() # 'MALFORMED_MANIFEST_ROOT'
+    try
+        expect(manifest).to.be.ok()
+        expect(root = manifest['gh-blog']).to.be.an 'object'
+    catch err
+        throw new ManifestError 'MALFORMED_MANIFEST_ROOT', err
+
+    try
+        expect(root).to.have.property 'provides'
+    catch err
+        throw new ManifestError 'MISSING_MANIFEST_ENTRY', err
     
-    expect(root = manifest['gh-blog']).to.be.an 'object' # 'MALFORMED_MANIFEST_ROOT'
-
-    expect(root).to.have.property 'provides' # 'MISSING_MANIFEST_ENTRY'
-    expect(root.provides).to.be.an 'array' # 'MALFORMED_MANIFEST_ENTRY'
-    expect(root.provides).to.not.be.empty() # 'MALFORMED_MANIFEST_ENTRY'
+    try
+        expect(root.provides).to.be.an 'array'
+        expect(root.provides).to.not.be.empty()
+        expect(element).to.be.a 'string' for element in root.provides
+    catch err
+        throw new ManifestError 'MALFORMED_MANIFEST_ENTRY', err
 
     if root.requires
-        expect(root.requires).to.be.an 'array' # 'MALFORMED_MANIFEST_ENTRY'
-        expect(root.requires).to.not.be.empty() # 'MALFORMED_MANIFEST_ENTRY'
-        
+        try
+            expect(root.requires).to.be.an 'array'
+            expect(root.requires).to.not.be.empty()
+            expect(element).to.be.a 'string' for element in root.requires
+        catch err
+            throw new ManifestError 'MALFORMED_MANIFEST_ENTRY', err
+            
         # Plugins should not require features they already provide
-        for feature in root.provides
-            expect(root.requires).to.not.contain feature # 'CIRCULAR_DEPENDENCY'
+        try
+            for feature in root.provides
+                expect(root.requires).to.not.contain feature
+        catch err
+            throw new ManifestError 'CIRCULAR_DEPENDENCY', err
 
     if root.recommends
-        expect(root.recommends).to.be.an 'array' # 'MALFORMED_MANIFEST_ENTRY'
-        expect(root.recommends).to.not.be.empty() # 'MALFORMED_MANIFEST_ENTRY'
+        try
+            expect(root.recommends).to.be.an 'array' # 'MALFORMED_MANIFEST_ENTRY'
+            expect(root.recommends).to.not.be.empty()
+            expect(element).to.be.a 'string' for element in root.recommends
+        catch err
+            throw new ManifestError 'MALFORMED_MANIFEST_ENTRY', err
         
-        # Plugins should not recommend features they already provide or require
-        for feature in Array::concat root.provides, root.requires
-            expect(root.recommends).to.not.contain feature # 'CIRCULAR_DEPENDENCY'
+        # Plugins should not recommend features they already provide,
+        try
+            for feature in root.provides
+                expect(root.recommends).to.not.contain feature # 'CIRCULAR_DEPENDENCY'
+        catch err
+            throw new ManifestError 'CIRCULAR_DEPENDENCY', err
+
+        # nor should they require features they recommend...
+        try
+            for feature in root.requires
+                expect(root.recommends).to.not.contain feature
+        catch err
+            throw new ManifestError 'DEPENDENCY_CONFLICT', err
 
     yes
