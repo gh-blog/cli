@@ -28,8 +28,8 @@
     "through2": "^0.6.1"
   },
   "gh-blog": {
-    "requires": ["index", "pagination", "info", "localization"],
-    "recommends": ["html", "scripts", "styles"],
+    "requires": ["info", "content", "excerpt", "index", "pagination", "localization", "creation-date"],
+    "recommends": ["scripts", "styles", "embed", "comments", "content-type", "metadata", "modification-date", "local-images", "status", "text-direction", "rss"],
     "provides": ["static"]
   }
 }

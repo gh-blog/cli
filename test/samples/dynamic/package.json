@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/gh-blog/dynamic",
   "gh-blog": {
-    "requires": [],
     "provides": ["scripts"]
   }
 }

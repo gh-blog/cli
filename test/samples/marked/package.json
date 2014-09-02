@@ -31,7 +31,8 @@
     "uslug": "^1.0.3"
   },
   "gh-blog": {
-    "requires": ["markdown"],
-    "provides": ["$", "html"]
+    "requires": ["info"],
+    "recommends": ["front-matter"],
+    "provides": ["content"]
   }
 }

@@ -23,6 +23,6 @@
   "homepage": "https://github.com/gh-blog/disqus",
   "gh-blog": {
     "provides": ["comments"],
-    "requires": ["info", "$"]
+    "requires": ["info", "$", "content"]
   }
 }

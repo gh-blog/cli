@@ -25,7 +25,7 @@
     "vinyl": "^0.3.3"
   },
   "gh-blog": {
-    "requires": ["info", "$"],
+    "requires": ["info", "$", "content"],
     "provides": ["styles", "syntax-highlighting"]
   }
 }

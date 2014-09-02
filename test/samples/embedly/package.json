@@ -29,6 +29,6 @@
   },
   "gh-blog": {
     "provides": ["embed"],
-    "requires": ["info", "$"]
+    "requires": ["info", "$", "content"]
   }
 }
